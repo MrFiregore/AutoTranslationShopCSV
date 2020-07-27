@@ -21,7 +21,6 @@ Edit .env file with your personal configuration
 
 ```cmd
 > .\vendor\bin\doctrine orm:schema-tool:create
-> .\vendor\bin\doctrine orm:schema-tool:update
 ```
 #### Step 4
 
