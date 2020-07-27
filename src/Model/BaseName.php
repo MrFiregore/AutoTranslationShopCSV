@@ -10,30 +10,30 @@
      * @ORM\MappedSuperclass
      * @ORM\HasLifecycleCallbacks
      */
-    class BaseNombre extends Base
+    class BaseName extends Base
     {
         /**
          * @ORM\Column(type="string", length=255, nullable=true, options={"default":NULL})
          * @var string
          */
-        protected $nombre = null;
+        protected $name = null;
 
         /**
          * @return string
          */
-        public function getNombre ()
+        public function getName ()
         {
-            return $this->nombre;
+            return $this->name;
         }
 
         /**
-         * @param string $nombre
+         * @param string $name
          *
          * @return $this
          */
-        public function setNombre ($nombre)
+        public function setName ($name)
         {
-            $this->nombre = $nombre;
+            $this->name = $name;
             return $this;
         }
 

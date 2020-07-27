@@ -3,7 +3,6 @@
     namespace firegore\AutoTranslationShopCSV\Model;
 
     use DateTime;
-    use Doctrine\Common\Collections\ArrayCollection;
     use Doctrine\ORM\Mapping as ORM;
 
     /**
@@ -24,13 +23,13 @@
          * @ORM\Column(type="datetime")
          * @var DateTime
          */
-        protected $fecha_creacion;
+        protected $creation_date;
 
         /**
          * @ORM\Column(type="datetime")
          * @var DateTime
          */
-        protected $fecha_actualizacion;
+        protected $update_date;
 
         /**
          * @var \Doctrine\ORM\Event\LifecycleEventArgs $args
@@ -38,8 +37,8 @@
          */
         public function prePersist ($args)
         {
-            $this->setCurrentDate($this->fecha_creacion);
-            $this->setCurrentDate($this->fecha_actualizacion);
+            $this->setCurrentDate($this->creation_date);
+            $this->setCurrentDate($this->update_date);
         }
 
         /**
@@ -48,7 +47,7 @@
          */
         public function preUpdate ($args)
         {
-            $this->setCurrentDate($this->fecha_actualizacion);
+            $this->setCurrentDate($this->update_date);
         }
 
         /**
@@ -59,25 +58,25 @@
             return $this->id;
         }
 
-        public function getFechaCreacion ()
+        public function getCreationDate ()
         {
-            return $this->fecha_creacion;
+            return $this->creation_date;
         }
 
-        protected function setFechaCreacion ($fecha_creacion)
+        protected function setCreationDate ($creation_date)
         {
-            $this->fecha_creacion = $fecha_creacion;
+            $this->creation_date = $creation_date;
             return $this;
         }
 
-        public function getFechaActualizacion ()
+        public function getUpdateDate ()
         {
-            return $this->fecha_actualizacion;
+            return $this->update_date;
         }
 
-        protected function setFechaActualizacion ($fecha_actualizacion)
+        protected function setUpdateDate ($update_date)
         {
-            $this->fecha_actualizacion = $fecha_actualizacion;
+            $this->update_date = $update_date;
             return $this;
         }
 

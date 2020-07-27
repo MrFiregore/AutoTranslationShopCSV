@@ -12,32 +12,32 @@
 
     /**
      * @ORM\Entity
-     * @ORM\Table(name="firegore_idioma")
+     * @ORM\Table(name="firegore_language")
      */
-    class Idioma extends BaseNombre
+    class Language extends BaseName
     {
         /**
          * @ORM\Column(type="string", length=64, nullable=true, options={"default":NULL}, unique=true)
-         * @var string
+         * @var string $short_name
          */
-        protected $nombre_corto = null;
+        protected $short_name = null;
 
         /**
          * @return string
          */
-        public function getNombreCorto ()
+        public function getShortName ()
         {
-            return $this->nombre_corto;
+            return $this->short_name;
         }
 
         /**
-         * @param string $nombre_corto
+         * @param string   $short_name
          *
-         * @return Idioma
+         * @return Language
          */
-        public function setNombreCorto($nombre_corto)
+        public function setShortName($short_name)
         {
-            $this->nombre_corto = $nombre_corto;
+            $this->short_name = $short_name;
             return $this;
         }
 

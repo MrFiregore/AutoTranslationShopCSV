@@ -5,9 +5,9 @@
     
     
     use Doctrine\ORM\EntityManager;
-    use firegore\AutoTranslationShopCSV\Model\Cadena;
-    use firegore\AutoTranslationShopCSV\Model\Idioma;
-    use firegore\AutoTranslationShopCSV\Model\Traduccion;
+    use firegore\AutoTranslationShopCSV\Model\Word;
+    use firegore\AutoTranslationShopCSV\Model\Language;
+    use firegore\AutoTranslationShopCSV\Model\Translation;
     use firegore\AutoTranslationShopCSV\Translator\Codes;
     use firegore\AutoTranslationShopCSV\Translator\GoogleTranslator;
 
@@ -26,16 +26,16 @@
          * @param   string   $code
          * @param   string   $name
          *
-         * @return \firegore\AutoTranslationShopCSV\Model\Idioma
+         * @return \firegore\AutoTranslationShopCSV\Model\Language
          * @throws \Doctrine\ORM\ORMException
          * @throws \Doctrine\ORM\OptimisticLockException
          */
         public function getLanguage ($code= false,$name = "")
         {
             if (!$code) $code = constant(Codes::class."::".strtoupper(locale_get_default()));
-            $lang = $this->getEntityManager()->getRepository(":Idioma")->findOneBy(["nombre_corto" => $code]);
+            $lang = $this->getEntityManager()->getRepository(":Language")->findOneBy(["short_name" => $code]);
             if (!$lang) {
-                $lang = (new Idioma())->setNombre($name)->setNombreCorto($code);
+                $lang = (new Language())->setName($name)->setShortName($code);
                 $this->getEntityManager()->persist($lang);
                 $this->getEntityManager()->flush();
             }
@@ -43,36 +43,36 @@
         }
     
         /**
-         * @param   string                               $string
-         * @param   \firegore\AutoTranslationShopCSV\Model\Idioma|null   $idioma
+         * @param   string                                                 $string
+         * @param   \firegore\AutoTranslationShopCSV\Model\Language|null   $language
          *
-         * @return \firegore\AutoTranslationShopCSV\Model\Cadena
+         * @return \firegore\AutoTranslationShopCSV\Model\Word
          * @throws \Doctrine\ORM\ORMException
          * @throws \Doctrine\ORM\OptimisticLockException
          */
-        public function getCadena(string $string,Idioma $idioma = null){
-            if (!$idioma) $idioma = $this->getLanguage();
-            $cadena = $this->getEntityManager()->getRepository(":Cadena")->findOneBy(["nombre" => $string, "idioma"=>$idioma]);
-            if (!$cadena) {
-                $cadena = (new Cadena())->setNombre($string)->setIdioma($idioma);
-                $this->getEntityManager()->persist($cadena);
+        public function getWord(string $string, Language $language = null){
+            if (!$language) $language = $this->getLanguage();
+            $word = $this->getEntityManager()->getRepository(":Word")->findOneBy(["name" => $string, "language"=>$language]);
+            if (!$word) {
+                $word = (new Word())->setName($string)->setLanguage($language);
+                $this->getEntityManager()->persist($word);
                 $this->getEntityManager()->flush();
             }
-            return $cadena;
+            return $word;
         }
     
         /**
-         * @param   \firegore\AutoTranslationShopCSV\Model\Cadena   $target
-         * @param   \firegore\AutoTranslationShopCSV\Model\Cadena   $trans
+         * @param   \firegore\AutoTranslationShopCSV\Model\Word   $target
+         * @param   \firegore\AutoTranslationShopCSV\Model\Word   $trans
          *
-         * @return \firegore\AutoTranslationShopCSV\Model\Traduccion
+         * @return \firegore\AutoTranslationShopCSV\Model\Translation
          * @throws \Doctrine\ORM\ORMException
          * @throws \Doctrine\ORM\OptimisticLockException
          */
-        public function setTraduccion(Cadena $target,Cadena $trans){
-            $translation = $this->getEntityManager()->getRepository(":Traduccion")->findOneBy(["cadena" => $target, "cadena_traducida"=>$trans]);
+        public function setTranslation(Word $target, Word $trans){
+            $translation = $this->getEntityManager()->getRepository(":Translation")->findOneBy(["word" => $target, "translated_word"=>$trans]);
             if (!$translation) {
-                $translation = (new Traduccion())->setCadena($target)->setCadenaTraducida($trans);
+                $translation = (new Translation())->setWord($target)->setTranslatedword($trans);
                 $this->getEntityManager()->persist($translation);
                 $this->getEntityManager()->flush();
             }
@@ -90,35 +90,35 @@
                 $entity_manager->getConnection()
                                ->query(
                                    "SELECT ic.id
-                                    FROM  firegore_cadena ic
-                                    LEFT JOIN firegore_traduccion it on ic.id = it.id_cadena
-                                    LEFT JOIN firegore_idioma ii on ic.id_idioma = ii.id
-                                    WHERE ii.nombre LIKE '%Spanish%'
+                                    FROM  firegore_word ic
+                                    LEFT JOIN firegore_translation it on ic.id = it.id_word
+                                    LEFT JOIN firegore_language ii on ic.id_language = ii.id
+                                    WHERE ii.name LIKE '%Spanish%'
                                     GROUP BY  ic.id
-                                    HAVING count(it.id) < (SELECT count(*) FROM firegore_idioma)-1");
+                                    HAVING count(it.id) < (SELECT count(*) FROM firegore_language)-1");
             $result = $query->fetchAll();
             $collection = collect($result);
     
             $collection->transform(function ($item, $key) {
                 return (int)$item["id"];
             });
-            foreach ($entity_manager->getRepository(":Cadena")->findBy(["id"=>$collection->toArray()]) as $cadena) {
+            foreach ($entity_manager->getRepository(":Word")->findBy(["id"=>$collection->toArray()]) as $word) {
                 /**
-                 * @var Cadena $cadena
+                 * @var Word $word
                  */
                 $query          =
                     $entity_manager->getConnection()
                                    ->query(
                                        "SELECT ii.*
-                                        FROM firegore_idioma ii
+                                        FROM firegore_language ii
                                         WHERE ii.id NOT IN (
-                                            SELECT ic.id_idioma
-                                            FROM firegore_cadena ic
-                                              WHERE ic.id = {$cadena->getId()}
+                                            SELECT ic.id_language
+                                            FROM firegore_word ic
+                                              WHERE ic.id = {$word->getId()}
                                             UNION
-                                              SELECT ic.id_idioma
-                                              FROM firegore_traduccion it
-                                              JOIN firegore_cadena ic on it.id_cadena = ic.id AND ic.id = {$cadena->getId()}
+                                              SELECT ic.id_language
+                                              FROM firegore_translation it
+                                              JOIN firegore_word ic on it.id_word = ic.id AND ic.id = {$word->getId()}
                                             )");
                 $result = $query->fetchAll();
                 $collection = collect($result);
@@ -126,20 +126,20 @@
                 $collection->transform(function ($item, $key) {
                     return (int)$item["id"];
                 });
-                foreach ($entity_manager->getRepository(":Idioma")
-                                        ->findBy(["id" => $collection->toArray()]) as $idioma) {
+                foreach ($entity_manager->getRepository(":Language")
+                                        ->findBy(["id" => $collection->toArray()]) as $language) {
                     /**
-                     * @var Idioma $idioma
+                     * @var Language $language
                      */
-                    if (($respuesta_traduccion = $translate->translate(
-                            $cadena->getNombre(),
-                            $idioma->getNombreCorto(),
-                            $cadena->getIdioma()->getNombreCorto()
-                        )->getTranslation()) && $respuesta_traduccion === "") continue;
+                    if (($translation_response = $translate->translate(
+                            $word->getName(),
+                            $language->getShortName(),
+                            $word->getLanguage()->getShortName()
+                        )->getTranslation()) && $translation_response === "") continue;
                     
-                    $cadena_traducida = $this->getCadena($respuesta_traduccion, $idioma);
+                    $translated_word = $this->getWord($translation_response, $language);
                     
-                    $this->setTraduccion($cadena,$cadena_traducida);
+                    $this->setTranslation($word, $translated_word);
                 }
                 $entity_manager->flush();
         

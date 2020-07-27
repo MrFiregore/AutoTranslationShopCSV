@@ -27,7 +27,7 @@
         'password'      => $_ENV["DB_PASSWORD"],
         'port'          => $_ENV["DB_PORT"],
         'host'          => $_ENV["DB_HOST"],
-        'driver'        => 'pdo_mysql',
+        'driver'        => $_ENV["DB_DRIVER"],
         'charset'       => 'utf8',
         'driverOptions' => [
             1002 => 'SET NAMES utf8',

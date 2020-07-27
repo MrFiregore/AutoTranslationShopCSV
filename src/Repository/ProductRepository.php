@@ -6,7 +6,7 @@
     
     use Doctrine\ORM\EntityRepository;
     
-    class ProductoRepository extends EntityRepository
+    class ProductRepository extends EntityRepository
     {
     
     }
