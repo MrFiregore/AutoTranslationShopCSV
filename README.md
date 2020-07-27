@@ -14,7 +14,7 @@ This project show how to use the google translation API for free with proxies an
 ```
 #### Step 2
 
-```cmd
+```
 Edit .env file with your personal configuration
 ```
 #### Step 3
